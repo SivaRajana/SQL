@@ -1,0 +1,42 @@
+1.
+Get the top 10 channels for which more number of users are subscribed in the year 2018.
+
+Note:
+In case, if the no_of_subscribers are same, then sort the output in the ascending order of channel_name.
+
+SELECT
+  channel.channel_id,
+  channel.name AS channel_name,
+  COUNT() AS no_of_subscribers
+FROM
+  channel_user
+  INNER JOIN channel ON channel_user.channel_id = channel.channel_id
+WHERE
+  CAST(
+    strftime("%Y", channel_user.subscribed_datetime) AS INT
+  ) = 2018
+GROUP BY
+  channel.channel_id
+ORDER BY
+  no_of_subscribers DESC,
+  channel.name
+LIMIT
+  10;
+-----------------------------------------------------------------------------------
+2.
+Get the number of users who possitively engaged with at least one video of Disney Channel (channel_id = 352).
+
+Note:
+Consider possitive engagement as LIKE for a video uploaded by Disney channel.
+SELECT
+  COUNT(DISTINCT user.user_id) AS no_of_users_reached // HERE USER.USER_ID should be there not USER.USER_name
+FROM
+  (
+    user
+    INNER JOIN user_likes ON user.user_id = user_likes.user_id
+  ) AS T
+  INNER JOIN video ON T.video_id = video.video_id
+WHERE
+  video.channel_id = 352
+  AND user_likes.reaction_type = "LIKE";
+  ------------------------------------------------------------------------
