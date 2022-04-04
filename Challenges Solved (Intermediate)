@@ -40,3 +40,148 @@ WHERE
   video.channel_id = 352
   AND user_likes.reaction_type = "LIKE";
   ------------------------------------------------------------------------
+3.
+Get the number of subscribers for each channel.
+
+Note:
+Sort the output in the descending order of no_of_subscribers, and then in the ascending order of channel_name.
+If there are no subscribers for a channel is 0, then keep the no_of_subscribers as 0.
+
+SELECT
+  channel.channel_id,
+  channel.name AS channel_name,
+  COUNT(channel_user.user_id) AS no_of_subscribers
+FROM
+  channel
+  LEFT JOIN channel_user ON channel_user.channel_id = channel.channel_id
+GROUP BY
+  channel.channel_id
+ORDER BY
+  no_of_subscribers DESC,
+  channel.name;
+ -----------------------------------------------------------------------------
+4.
+Get the number of videos uploaded by the "News for you" channel in the year in 2018.
+
+SELECT
+  COUNT() AS no_of_videos
+FROM
+  video
+  INNER JOIN channel ON video.channel_id = channel.channel_id
+WHERE
+  channel.name = "News for you"
+  AND CAST(strftime("%Y", video.published_datetime) AS INT) = 2018
+-----------------------------------------------------------------
+5 Get the number of users subscribed for the "Taylor Swift" channel in every month in the year 2018.
+
+Note:
+Sort the output in the ascending order of month_in_2018.
+Ignore the months that have subscribers_per_month as 0.
+
+SELECT
+  CAST(
+    strftime("%m", channel_user.subscribed_datetime) AS INT
+  ) AS month_in_2018,
+  COUNT(channel_user.user_id) AS subscribers_per_month
+FROM
+  channel
+  INNER JOIN channel_user ON channel.channel_id = channel_user.channel_id
+WHERE
+  channel.name = "Taylor Swift"
+  AND CAST(
+    strftime("%Y", channel_user.subscribed_datetime) AS INT
+  ) = 2018
+GROUP BY
+  CAST(
+    strftime("%m", channel_user.subscribed_datetime) AS INT
+  )
+ORDER BY
+  CAST(
+    strftime("%m", channel_user.subscribed_datetime) AS INT
+  )
+------------------------------------------------------------------------------------
+6.
+Get the number of videos published by each channel.
+
+Note:
+If a channel did not upload any video, keep the no_of_videos as 0.
+Sort the output in the ascending order of channel_name.
+
+SELECT
+  channel.name AS channel_name,
+  COUNT(video.video_id) AS no_of_videos
+FROM
+  channel
+  LEFT JOIN video ON channel.channel_id = video.channel_id
+GROUP BY
+  channel.channel_id
+ORDER BY
+  channel.name;
+--------------------------------------------------------------------------------
+7.
+Get all the channels that published at least 5 videos in the year 2018.
+
+Note:
+Sort the output in the ascending order of channel_id.
+
+SELECT
+  channel.channel_id,
+  channel.name AS channel_name,
+  COUNT() AS no_of_videos
+FROM
+  channel
+  INNER JOIN video ON channel.channel_id = video.channel_id
+WHERE
+  strftime("%Y", video.published_datetime) = "2018"
+GROUP BY
+  channel.channel_id
+HAVING
+  no_of_videos >= 5
+ORDER BY
+  channel.channel_id
+ ---------------------------------------------------------------
+ 8.
+How many times each user has engaged with the videos of "News for you" channel (id = 366).
+
+Note:
+Consider engagement as LIKE or DISLIKE for a video uploaded by News for you channel.
+Ignore the users who did not engage with the channel at least once.
+Sort the output in the descending order of no_of_reactions, and then in the ascending order of user_id.
+
+SELECT
+  user_likes.user_id,
+  COUNT() AS no_of_reactions
+FROM
+  user_likes
+  INNER JOIN video ON user_likes.video_id = video.video_id
+WHERE
+  video.channel_id = 366
+GROUP BY
+  user_likes.user_id
+ORDER BY
+  no_of_reactions DESC,
+  user_likes.user_id;
+ ------------------------------------------------------------------
+ 9.
+Get all the videos that have more than the average number of views.
+
+Note:
+Sort the output in the ascending order of name.
+Expected Output Format
+
+SELECT
+  name,
+  no_of_views
+FROM
+  video
+WHERE                                         // SUB QUERY 
+  no_of_views > (
+    SELECT
+      avg(no_of_views)
+    FROM
+      video
+  )
+ORDER BY
+  name
+
+
