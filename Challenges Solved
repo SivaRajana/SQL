@@ -1,0 +1,251 @@
+Fetch the top 10 videos having more number of views.
+
+Note:
+Sort the output in the descending order of no_of_views, and then in the ascending order of name.
+
+SELECT
+  name,
+  no_of_views
+FROM
+  video
+ORDER BY
+  no_of_views DESC,
+  name ASC
+LIMIT
+  10;
+ --------------------
+Fetch the top 10 videos having more number of views, along with the channel details.
+
+Note:
+Sort the output in the descending order of no_of_views, and then in the ascending order of channel_name.
+
+ SELECT
+  video.name AS video_name,
+  video.no_of_views,
+  channel.name AS channel_name
+FROM
+  video
+  INNER JOIN channel ON video.channel_id = channel.channel_id
+ORDER BY
+  video.no_of_views DESC,
+  channel.name ASC
+LIMIT
+  10;
+  ----------------------------------
+  
+Get all the music videos released before the year 2016.
+
+Note:
+You can consider the videos which contain "music" in name as music videos.
+Get the year in the integer format
+Sort the output in the descending order of year, and then in the ascending order of name.
+
+  SELECT
+  name,
+  no_of_views,
+  CAST(strftime(published_datetime) AS INT) AS year
+FROM
+  video
+WHERE
+  name LIKE "%music%"
+  AND CAST(strftime(published_datetime) AS INT) < 2016
+ORDER BY
+  CAST(strftime(published_datetime) AS INT) DESC,
+  name ASC;
+  -------------------------------------------
+  Get all distinct channels which published music videos before 2016.
+
+Note:
+You can consider the videos which contain "music" in name as music videos.
+Sort the output in the ascending order of chanel_name.
+
+SELECT
+  DISTINCT channel.channel_id,
+  channel.name AS channel_name
+FROM
+  video
+  INNER JOIN channel ON video.channel_id = channel.channel_id
+WHERE
+  video.name LIKE "%music%"
+  AND CAST(strftime(published_datetime) AS INT) < 2016
+ORDER BY
+  channel.name ASC;
+  --------------------------------------------
+  5.
+Get all the review videos, i.e., videos which contain "review" in their name.
+
+Note:
+Sort the output in the descending order of no_of_views.
+SELECT
+  video.name,
+  video.no_of_views
+FROM
+  video
+WHERE
+  video.name LIKE "%review%"
+ORDER BY
+  no_of_views DESC;
+  ----------------------------------
+6.
+Get all the unique channels that published review videos.
+
+Note:
+You can consider the videos which contain "review" in name as review videos.
+Sort the output in the ascending order of channel_name.
+SELECT
+  DISTINCT channel.channel_id,
+  channel.name AS channel_name
+FROM
+  video
+  INNER JOIN channel ON video.channel_id = channel.channel_id
+WHERE
+  video.name LIKE "%review%"
+ORDER BY
+  channel.name ASC;
+-------------------------------
+7.
+Get all the videos that belong to "Action" genre (genre_id = 201) and have more than 1 lakh views.
+
+Note:
+Sort the output in the ascending order of video_id.
+
+SELECT
+  video.video_id,
+  video.name,
+  video_genre.genre_id
+FROM
+  video
+  INNER JOIN video_genre ON video.video_id = video_genre.video_id
+WHERE
+  video_genre.genre_id = 201
+  AND video.no_of_views > 100000
+ORDER BY
+  video.video_id;
+-----------------------------
+8.
+Get all the Indian users details whose age is below 30 years and liked the video (video_id = 1011) in the year 2020.
+
+Note:
+Consider the name of the country as "INDIA"
+Consider reaction_type LIKE as liked.
+Sort the output in the ascending order of name.
+
+SELECT
+  name,
+  gender,
+  age,
+  country,
+  premium_membership
+FROM
+  user
+  INNER JOIN user_likes ON user.user_id = user_likes.user_id
+WHERE
+  user.country LIKE 'INDIA'
+  AND user_likes.reaction_type LIKE "LIKE"
+  AND user.age < 30
+  AND user_likes.video_id = 1011
+ORDER BY
+  name;
+-------------------------------
+9.
+Find the number of videos published between the years 2010 & 2016.
+
+Note:
+Sort the output in the ascending order of the year
+Keep the year in the integer format
+
+SELECT
+  CAST(strftime("%Y", video.published_datetime) AS INT) AS year,
+  COUNT() AS no_of_videos
+FROM
+  video
+WHERE
+  CAST(strftime("%Y", video.published_datetime) AS INT) BETWEEN 2010
+  AND 2016
+GROUP BY
+  CAST(strftime("%Y", video.published_datetime) AS INT)
+ORDER BY
+  CAST(strftime("%Y", video.published_datetime) AS INT)
+---------------------------------------------------
+10.
+Between 2010 & 2020, find the number of videos released in each of the below genres.
+
+Note:
+genre_ids : 201, 202, 204, 205, 206, 207
+Sort the output in the descending order of no_of_videos, and then in the ascending order of genre_id.
+
+SELECT
+  genre_id,
+  COUNT() AS no_of_videos
+FROM
+  video
+  INNER JOIN video_genre ON video.video_id = video_genre.video_id
+WHERE
+  (
+    CAST(strftime("%Y", video.published_datetime) AS INT) BETWEEN 2010
+    AND 2020
+  )
+  AND (
+    video_genre.genre_id IN (201, 202, 204, 205, 206, 207)
+  )
+GROUP BY
+  video_genre.genre_id
+ORDER BY
+  no_of_videos DESC,
+  genre_id ASC;
+ ------------------------------------------
+ Get the total number of channels in the database.
+ SELECT
+  COUNT(channel_id) AS no_of_channels
+FROM
+  channel
+------------------------------------
+
+Get the total number of users subscribed for the channel "Tyler Oakley" (channel_id = 376) in the year 2018.
+SELECT
+  COUNT() AS no_of_subscribers
+FROM
+  channel_user
+WHERE
+  channel_id = 376
+  AND strftime("%Y", subscribed_datetime) = '2018'
+-------------------------------------
+13.
+Get the total number of countries where the users of the platform are present.
+SELECT
+  COUNT(DISTINCT country) AS country_count
+FROM
+  user
+-------------------------------------------
+14.
+Get the total number of countries where the subscribers of the Taylor Swift channel (channel_id = 399) are present.
+
+SELECT
+  COUNT(DISTINCT user.country) AS country_count
+FROM
+  channel_user
+  INNER JOIN user ON channel_user.user_id = user.user_id
+WHERE
+  channel_user.channel_id = 399
+-----------------------------------------------------
+15.
+Insights about users:
+Get the geographic distribution of Taylor Swift channel (channel_id = 399) subscribers.
+
+Note:
+Geographic distribution: Number of Taylor Swift subscribers present in each country. Ignore the countries whereno_of_subscribersis 0.
+Order the result in the ascending order of the country name.
+
+SELECT
+  user.country,
+  COUNT() AS no_of_subscribers
+FROM
+  channel_user
+  INNER JOIN user ON channel_user.user_id = user.user_id
+WHERE
+  channel_user.channel_id = 399
+GROUP BY
+  user.country
+ORDER BY
+  country;
+  
